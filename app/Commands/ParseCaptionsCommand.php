@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Workers;
+use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use League\CLImate\CLImate;
 
@@ -18,7 +19,7 @@ class ParseCaptionsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'do {file} {second?} {--start=0}';
+    protected $signature = 'do {file} {second?} {--start=0} {--media=""} {--caption-delay=0}';
 
     /**
      * The description of the command.
@@ -76,6 +77,12 @@ class ParseCaptionsCommand extends Command
             array_key_last($first_captions),
             array_key_last($second_captions)
         );
+
+        // Any media to enque?
+        $this->enqueMedia();
+
+        // do we need any caption delay?
+        $this->setCaptionDelay();
 
         // go with the loop
         $this->theLoop($start, $length_in_seconds, $first_captions, $second_captions);
@@ -173,6 +180,35 @@ class ParseCaptionsCommand extends Command
             $this->climate->whisper()->out($text);
         }
 
+    }
+
+    private function enqueMedia()
+    {
+
+        $media = $this->option('media') ?? null;
+
+        // no media, no worry
+        if (is_null($media)) return;
+
+        // curb for MacOS at the moment
+        if (PHP_OS === "Darwin") {
+
+            if (Str::endsWith($media, 'm4a')) {
+                $this->info("Starting player in new thread. " );
+                $this->info('note: kill player via "pkill afplayer" ');
+                system('afplay ' . $media . ' > /dev/null 2>&1 &');
+
+            }
+        } else {
+            $this->info("TODO: Support other media OS media play.");
+        }
+    }
+
+    private function setCaptionDelay()
+    {
+        $caption_delay = $this->option('caption-delay') ?? 0;
+        if($caption_delay === 0 ) return;
+        sleep($caption_delay);
     }
 
 

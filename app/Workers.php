@@ -78,7 +78,7 @@ class Workers
         $intCaptions = [];
 
         // put in a place holder early
-        $intCaptions[1] = "Starting soon..";
+        $intCaptions[0] = "Starting soon..";
 
         foreach ($captions as $key => $caption) {
             $startAsInteger = (int) $caption->startTime;

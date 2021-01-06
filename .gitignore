@@ -5,3 +5,5 @@
 .phpunit.result.cache
 *.srt
 *.SRT
+*.m4a
+*.en.srt
